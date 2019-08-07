@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Calendar = require('../models/calendar');
+const calendarCollection = 'Calendar';
+const employeeCollection = 'Employee';
 
 router.get('/', (req, res) => {
     res.json('asd');
@@ -8,7 +9,7 @@ router.get('/', (req, res) => {
 
 
 router.get('/', (req, res) => {
-    let collection = req.app.locals.collection('Calendar');
+    let collection = req.app.locals.collection(calendarCollection);
     collection.find({}).then((err, calendar) => {
         if (err) return console.error(err);
         res.json(calendar);
@@ -16,8 +17,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-    let collection = req.app.locals.collection('Calendar');
-    collection.findOne({
+    req.app.locals.collection(calendarCollection).findOne({
         '_id' : req.params.id
     }, (err, result) => {
     if (err) res.status(400).send({'error': err});
@@ -28,25 +28,21 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    let collection = req.app.locals.collection('Calendar');
     const newCalendar = {
         employee_id: req.body.employee_id,
         note: req.body.note,
         info: req.body.info                                 //check req.body.info
     };
-
-    const employee = await collection.findOne({
-        employee_id: req.body.employee_id
+    const result = req.app.locals.collection(calendarCollection)
+        .insertOne({newCalendar}, (err, result) => {
+        if (err) res.status(400).send({'error': err});
+        res.status(200).send(result);
     });
 
-    if (employee === null) {
-        collection.insertOne({newCalendar}, (err, result) => {
-            if (err) res.status(400).send({'error': err});
-            res.status(200).send(result);
-        })
-    } else {
+    req.app.locals.collection(employeeCollection).updateOne({
+        '_id': req.body.employee_id
+    }, {$push: {calendar_id: result._id}});
 
-    }
 });
 
 router.delete('/:id', (req, res) => {

@@ -1,7 +1,9 @@
 const employee = {
+    validator: {
+        $jsonSchema: {
             bsonType: 'object',
-            required: ['email, phone'],
-            properties : {
+            required: ['email'],
+            properties: {
                 name: {
                     bsonType: 'string'
                 },
@@ -11,9 +13,9 @@ const employee = {
                 },
                 phone: {
                     bsonType: 'number',
-                    patter: '/^[0-9]/'
+                    pattern: '/^[0-9]/'
                 },
-                note :{
+                note: {
                     bsonType: 'string'
                 },
                 calendar_id: {
@@ -21,6 +23,8 @@ const employee = {
 
                 }
             }
+        }
+    }
 };
 
 module.exports = employee;

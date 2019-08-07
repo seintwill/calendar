@@ -2,27 +2,44 @@ const MongoClient = require('mongodb').MongoClient;
 const Employee = require('../models/employee');
 const express = require('express');
 const app = express();
+const objectId = require('mongodb').objectId;
 
-const urlMongodb = 'mongodb://localhost:27017/calendar';
+const urlMongodb = 'mongodb://localhost:27017/calendar1';
+const nameCollection = 'example1';
 
 MongoClient.connect(urlMongodb,{useNewUrlParser: true}, async function(err, client) {
     if(err) console.log(err);
-    app.listen(3000);
-    const db = client.db('calendar');
-    const collection = db.collection('Employee');
-    const emp = await db.createCollection('Employee', {validator: {$jsonSchema: Employee}}, (err, res) => {
-        if (err) console.log(err)
-        else console.log('Collection created!');
-    });
+    app.listen(7000);
+    const db = await client.db('calendar2');
+    // db.dropCollection(nameCollection);
+    // const collection = await db.collection('Employee');
+    // await db.createCollection(nameCollection, Employee);
     const newEmployee = {
-        name: 'test name',
-        email: 'emailemail.com',
-        phone: 'asd',
-        note: 'test note',
+        // name: 't1',
+        email: 't1tt@mail.ru',
+        // phone: 91,
+        // note: 't1',
+        // calendar_id: objectId
     };
-    const result = await collection.insertOne(newEmployee, {$jsonSchema: Employee});
-    // const result = await collection.findOne({
-    //     '_id': 1
+    // await db.collection(nameCollection).createIndex({email:1}, {unique: true});
+    // await db.collection(nameCollection).insertOne({
+    //     name: '123' || 'yulia',
+    //     email: 'asxc@asd.ru',
+    //     phone: 911,
+    //     note: 'dick'
     // });
+
+
+     db.collection(nameCollection).findOne({ 'name': 'yulia' }, (err, result) => {
+         console.log(result);
+         // db.collection(nameCollection).updateOne({'name': 'popova'}, {
+         //     $set: {
+         //         name: 'yulia' || result.name,
+         //         phone: null || result.phone,
+         //         note: 'big' || result.name,
+         //         email: result.email
+         //     }
+         // }, {upsert: true}).then(res => console.log(res));
+     });
     // console.log(result);
 });
