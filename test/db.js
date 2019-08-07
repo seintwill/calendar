@@ -13,7 +13,7 @@ MongoClient.connect(urlMongodb,{useNewUrlParser: true}, async function(err, clie
     const db = await client.db('calendar2');
     // db.dropCollection(nameCollection);
     // const collection = await db.collection('Employee');
-    // await db.createCollection(nameCollection, Employee);
+    await db.createCollection(nameCollection, Employee);
     const newEmployee = {
         // name: 't1',
         email: 't1tt@mail.ru',
@@ -21,17 +21,18 @@ MongoClient.connect(urlMongodb,{useNewUrlParser: true}, async function(err, clie
         // note: 't1',
         // calendar_id: objectId
     };
-    // await db.collection(nameCollection).createIndex({email:1}, {unique: true});
-    // await db.collection(nameCollection).insertOne({
-    //     name: '123' || 'yulia',
-    //     email: 'asxc@asd.ru',
-    //     phone: 911,
-    //     note: 'dick'
-    // });
+    await db.collection(nameCollection).createIndex({email:1}, {unique: true});
+    const insert = await db.collection(nameCollection).insertOne({
+        name: '123' || 'yulia',
+        email: 'asasdxc@asd.ru',
+        phone: 911,
+        note: 'dick'
+    });
 
+    console.log(`insert: ${insert}`);
 
-     db.collection(nameCollection).findOne({ 'name': 'yulia' }, (err, result) => {
-         console.log(result);
+     const result = await db.collection(nameCollection).find().toArray();
+     console.log(result);
          // db.collection(nameCollection).updateOne({'name': 'popova'}, {
          //     $set: {
          //         name: 'yulia' || result.name,
@@ -40,6 +41,5 @@ MongoClient.connect(urlMongodb,{useNewUrlParser: true}, async function(err, clie
          //         email: result.email
          //     }
          // }, {upsert: true}).then(res => console.log(res));
-     });
     // console.log(result);
 });
