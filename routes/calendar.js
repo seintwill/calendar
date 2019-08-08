@@ -4,8 +4,17 @@ const calendarCollection = 'Calendar';
 const employeeCollection = 'Employee';
 
 router.get('/', async (req, res) => {
-	const result = await req.app.locals.collection(calendarCollection).find({});
-	res.json(result);
+	const start = req.query.start || new Date(0);
+	const end = req.query.end || new Date();
+
+	const result = await req.app.locals.collection(employeeCollection).find({where: {
+	    $and: [
+	        {start: {$lte: end}},
+            {end: {$gte: start}}
+            ]
+	}}).sort({start: 1}).toArray();
+
+	result.map()
 });
 
 router.get('/:id', async (req, res) => {
