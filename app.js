@@ -17,10 +17,14 @@ MongoClient.connect(urlMongodb, function(err, client) {
 });
 
 app.get('/', (req, res) => {
+
+    const query = {};
+
     for (key in req.query) {
         console.log(`${key}: ${req.query[key]}`);
     }
-    res.json(`params: ${req.query.start}`);
+    console.log(query.start >= 1);
+    res.json(`params: ${query.status}`);
 });
 
 module.exports = app;
