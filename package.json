@@ -4,7 +4,7 @@
   "main": "node app.js",
   "scripts": {
     "test": "mocha test/*.test.js",
-    "start": "node app.js"
+    "start": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +12,9 @@
   "dependencies": {
     "express": "^4.17.1",
     "expressjs": "^1.0.1",
+    "moment": "^2.24.0",
     "mongodb": "^3.2.7",
+    "nodemon": "^1.19.1",
     "supertest": "^4.0.2",
     "tape": "^4.11.0"
   },

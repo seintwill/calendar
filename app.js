@@ -1,6 +1,7 @@
 const express = require('express'),
     MongoClient = require('mongodb').MongoClient,
     app = express(),
+    moment = require('moment'),
     employee = require('./models/employee'),
     calendar = require('./models/calendar');
 
@@ -17,6 +18,10 @@ MongoClient.connect(urlMongodb, function(err, client) {
 });
 
 app.get('/', (req, res) => {
+
+    const start = moment([2014, 0, 5]);
+    const end = moment([2013, 0, 10]);
+    console.log(start.diff(end, 'days'));
 
     const query = {};
 
