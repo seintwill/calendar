@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "node app.js",
   "scripts": {
-    "test": "mocha test/*.test.js",
     "start": "nodemon app.js"
   },
   "keywords": [],
