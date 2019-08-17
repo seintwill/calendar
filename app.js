@@ -15,8 +15,8 @@ app.use('/statistics', routerStatistics);
 
 MongoClient.connect(urlMongodb, function(err, client) {
     if(err) console.log(err);
-    client.createCollection('employee', employee);
-    client.createCollection('calendar', calendar);
+    // client.db('calendar').createCollection('employee', employee);
+    // client.db('calendar').createCollection('calendar', calendar);
     app.locals.collection = client.db('calendar');
     app.listen(3000);
 });
