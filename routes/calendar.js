@@ -1,27 +1,32 @@
 const mongodb = require('mongodb');
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 const employeeCollection = 'employee';
 const calendarCollection = 'calendar';
 
 router.get('/', async (req, res) => {
     const query = {};
-    if (req.query.status) query.status = {$eq: req.query.status};
-    if (req.query.end) query.start = {$lte: req.query.end};
-    if (req.query.start) query.end = {$gte: req.query.start};
+    const date = {};
+    if (req.query.start) date.start = moment(req.query.start).toDate();
+    if (req.query.end) date.end = moment(req.query.end).toDate();
 
-	const result = await req.app.locals.collection(employeeCollection).find(query).sort({start: 1}).toArray();
+    if (req.query.status) query.status = {$eq: req.query.status};
+    if (req.query.end) query.start = {$lte: date.end};
+    if (req.query.start) query.end = {$gte: date.start};
+
+	const result = await req.app.locals.collection.collection(calendarCollection).find(query).sort({start: 1}).toArray();
 
 	result.map(item => {
-	    if(item.start <= query.start) item.start = query.start;
-	    if(item.end >= query.end) item.end = query.end;
+	    if (moment(item.start).isBefore(date.start)) item.start = date.start;
+	    if (moment(item.end).isAfter(date.end)) item.end = date.end;
     });
 
     res.status(200).json(result);
 });
 
 router.get('/:id', async (req, res) => {
-    const result = await req.app.locals.collection(calendarCollection).findOne({
+    const result = await req.app.locals.collection.collection(calendarCollection).findOne({
         '_id' : mongodb.ObjectID(req.params.id)
     });
     if (result == null) res.status(404).json('Calendar is not found');
@@ -30,18 +35,18 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const newCalendar = {
-        employee_id: mongodb.ObjectID(req.body.employee_id),
-        start: req.body.start,
-        end: req.body.end,
-        status: req.body.status,
-	    proportionOfWorkingDay: req.body.proportionOfWorkingDay
+        employee_id: req.query.employee_id,
+        start: moment(req.query.start).toDate(),
+        end: moment(req.query.end).toDate(),
+        status: req.query.status,
+	    proportionOfWorkingDay: req.query.proportionOfWorkingDay
     };
 
-    if (req.body.note) newCalendar.note = req.body.note;
+    if (req.query.note) newCalendar.note = req.query.note;
 
-    const result = await req.app.locals.collection(calendarCollection).insertOne(newCalendar);
+    const result = await req.app.locals.collection.collection(calendarCollection).insertOne(newCalendar);
 
-    await req.app.locals.collection(employeeCollection).updateOne({
+    await req.app.locals.collection.collection(employeeCollection).updateOne({
         '_id': mongodb.ObjectID(req.body.employee_id)
     }, {$push: {calendar_id: result._id}});
 
@@ -49,12 +54,12 @@ router.post('/', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-    await req.app.locals.collection(calendarCollection).findOneAndDelete({
+    await req.app.locals.collection.collection(calendarCollection).findOneAndDelete({
         '_id': mongodb.ObjectID(req.params.id)
     }, (err, result) => {
         if (err) res.status(400).send({'error': err});
 
-        req.app.locals.collection(employeeCollection).updateOne({
+        req.app.locals.collection.collection(employeeCollection).updateOne({
             '_id': result.employee_id
         }, {
             $pull: {
@@ -69,14 +74,14 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', (req, res) => {
     const query = {};
     const status = ['vacation', 'remoteWork', 'sick', 'work'];
-    if (req.body.employee_id) query.employee_id = mongodb.ObjectID(req.body.employee_id);
-    if (req.body.start) query.start = req.body.start;
-    if (req.body.end) query.end = req.body.end;
-    if (req.body.status && status.includes(req.body.status)) query.status = req.body.status;
-    if (req.body.note) query.note = req.body.note;
+    if (req.query.employee_id) query.employee_id = mongodb.ObjectID(req.query.employee_id);
+    if (req.query.start) query.start = moment(req.query.start).toDate();
+    if (req.query.end) query.end = moment(req.query.end).toDate();
+    if (req.query.status && status.includes(req.query.status)) query.status = req.query.status;
+    if (req.query.note) query.note = req.query.note;
 
-    req.app.locals.collection(calendarCollection).updateOne({
-        '_id': req.params.id
+    req.app.locals.collection.collection(calendarCollection).updateOne({
+        '_id': mongodb.ObjectID(req.params.id)
     }, {
         $set: query
     }, (err, result) => {

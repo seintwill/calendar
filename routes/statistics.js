@@ -6,21 +6,26 @@ const employeeCollection = 'employee';
 
 router.get('/', async (req, res) => {
     const query = {};
-
-    if (req.query.end) query.start = {$lte: req.query.end};
-    if (req.query.start) query.end = {$gte: req.query.start};
+    if (req.query.end) query.start = {$lte: moment(req.query.end).toDate()};
+    if (req.query.start) query.end = {$gte: moment(req.query.start).toDate()};
     if (req.query.ids) query.employee_id = {$in: ids};
 
-    const filter = await req.app.locals.collection(calendarCollection).find(query).sort({start: 1}).toArray();
+    const date = {};
+    if (req.query.start) date.start = moment(req.query.start).toDate();
+    if (req.query.end) date.end = moment(req.query.end).toDate();
 
-    const result =filter.reduce(function (memo, calendar) {
-        if(calendar.start <= query.start) calendar.start = query.start;
-        if(calendar.end >= query.end) calendar.end = query.end;
+    const filter = await req.app.locals.collection.collection(calendarCollection).find(query).sort({start: 1}).toArray();
+
+    const result = filter.reduce(function (memo, calendar) {
+        if (moment(calendar.start).isBefore(date.start)) calendar.start = date.start;
+        if (moment(calendar.end).isAfter(date.end)) calendar.end = date.end;
 
         return memo[calendar.employee_id] = {
-            [calendar.status]: calendar.start.diff(calendar.end, 'days')
+            'employee_id': calendar.employee_id,
+            'calendar_id': calendar._id,
+            [calendar.status]: moment(calendar.end).diff(calendar.start, 'days')
         }
-    }, {});
+    }, []);
 
     res.status(200).json(result);
 });
