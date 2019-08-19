@@ -20,12 +20,14 @@ router.get('/', async (req, res) => {
         if (moment(calendar.start).isBefore(date.start)) calendar.start = date.start;
         if (moment(calendar.end).isAfter(date.end)) calendar.end = date.end;
 
-        return memo[calendar.employee_id] = {
+        memo[calendar.employee_id] = ([{
             'employee_id': calendar.employee_id,
             'calendar_id': calendar._id,
             [calendar.status]: moment(calendar.end).diff(calendar.start, 'days')
-        }
-    }, []);
+        }]);
+
+        return memo;
+    }, {});
 
     res.status(200).json(result);
 });
