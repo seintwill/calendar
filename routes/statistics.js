@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const moment = require('moment');
+const _ = require('underscore');
 const calendarCollection = 'calendar';
 const employeeCollection = 'employee';
 
@@ -16,18 +17,13 @@ router.get('/', async (req, res) => {
 
     const filter = await req.app.locals.collection.collection(calendarCollection).find(query).sort({start: 1}).toArray();
 
-    const result = filter.reduce(function (memo, calendar) {
-        if (moment(calendar.start).isBefore(date.start)) calendar.start = date.start;
-        if (moment(calendar.end).isAfter(date.end)) calendar.end = date.end;
+    const result = _.groupBy(filter, (item) => {
+        if (moment(item.start).isBefore(date.start)) item.start = date.start;
+        if (moment(item.end).isAfter(date.end)) item.end = date.end;
+        item[item.status] = moment(item.end).diff(item.start, 'days');
 
-        memo[calendar.employee_id] = ([{
-            'employee_id': calendar.employee_id,
-            'calendar_id': calendar._id,
-            [calendar.status]: moment(calendar.end).diff(calendar.start, 'days')
-        }]);
-
-        return memo;
-    }, {});
+        return item.employee_id;
+    });
 
     res.status(200).json(result);
 });
